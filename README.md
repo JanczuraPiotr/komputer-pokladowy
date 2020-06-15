@@ -1,5 +1,9 @@
-"Komputer pokàadowy" dla samochodu Suzuki Vitara. Dodatkowe funkcje dla wàasnych potrzeb.
-Platforma sprz©towa : raspberry pi i arduino
+"Komputer pok≈Çadowy" dla samochodu Suzuki Vitara. Dodatkowe funkcje dla w≈Çasnych potrzeb.
+Platforma sprzƒôtowa : raspberry pi i arduino
+
+
+
+
 
 
 
