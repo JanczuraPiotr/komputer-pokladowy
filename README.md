@@ -9,11 +9,14 @@ Platforma sprzƒôtowa : raspberry pi i arduino
 
 ### Notatki
 
-Przydatne podczas konfigurowania moduàu BT CAN  ELM327:
-Moduà domyòlnie widziany jest jako rfcomm9.
+Przydatne podczas konfigurowania modu≈Çu BT CAN  ELM327:
+Modu≈Ç domy≈õlnie widziany jest jako rfcomm9.
 
 cd /dev
+
 rm -f ttyS3
+
 ln -s rfcomm0 ttyS3
+
 chmod 766 rfcomm0
 

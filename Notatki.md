@@ -9,9 +9,15 @@ skompilowane i uruchamia się:
 
 https://github.com/ejvaughan/obdii
 
+Najświeższe, zbiór prostych narzędzi. Wygląda jak wykonane tylko w oparciu o bibliotekę systemową
 
+https://github.com/linux-can/can-utils
 
 ----
+
+Chyba najbardziej rozbudowane w javie
+
+https://github.com/dmatej/java-cardiag
 
 Klasa i przykłady dla arduino
 https://github.com/PowerBroker2/ELMduino
@@ -19,7 +25,7 @@ https://github.com/PowerBroker2/ELMduino
 Zainstalować na telefonie
 https://github.com/M-Helm/OBDTerminal
 
-Api w javie
+Api w javie android
 https://github.com/eltonvs/java-obd-api
 
 Prawdopodobnie istnieje jako paczka ale nie udało mi się zainstalować
@@ -54,11 +60,32 @@ https://github.com/peterh/pyobd
 Dla Raspberry Pi od 6 lat bez opieki  
 https://github.com/Pbartek/pyobd-pi
 
+Wygląda jak zalążek porzuconego projektu trochę notatek i linków.
+
+https://github.com/huirad/rpi_obd2
+
+Monitoring przez www
+
+https://github.com/EstevanTH/CAN-Monitoring_ELM327
+
+Rozbudowane na androida
+
+https://github.com/tpltnt/pyELM327
 
 
 
+
+
+https://github.com/tpltnt/pyELM327
+
+https://github.com/iwanders/OBD9141
+
+https://github.com/stanleyhuangyc/ArduinoOBD
+
+https://github.com/chr4/nerdobd2
 
 https://github.com/limiter121/esp32-obd2-emulator
+https://github.com/hartkopp/can-isotp
 
 
 
