@@ -6,10 +6,17 @@ const int SUPPLY_RADIO = 16;              // Zasilanie radia
 const int BATERY_CHARGING = 17;           // Ładowanie baterii
 const int BATTERY_VOLTAGE = 18;           // Napięcie baterii
 const int CAR_VOLTAGE = 19;               // Napięcie w samochodzie
-const double CAR_OFF_VOLTAGE = 10.0;      // Napięcie poniżej którego uznajemy że samochód jest wyłączony
-const double CAR_ON_VOLTAGE = 11.0;       // Napięcie poniżej którego uznajemy że samochód jest włączony.
-const double CAR_CHARGING_VOLTAGE = 12.60;// Napięcie w samochodzie powyżej którego uznajemy że jest ładowanie.
-const double CAR_LOW_VOLTAGE = 12.50;     // Napięcie w instalacji samochodu po niżej którego dołączamy baterię.
+const double CAR_OFF_VOLTAGE = 10.0;      // Napięcie poniżej którego uznajemy że samochód został wyłączony
+const double CAR_ON_VOLTAGE = 11.0;       // Napięcie powyżej którego uznajemy że samochód został włączony.
+const double CAR_CHARGING_VOLTAGE = 12.30;// Napięcie w samochodzie powyżej którego uznajemy że jest ładowanie.
+const double CAR_LOW_VOLTAGE = 12.0
+
+
+
+
+
+    0;
+// Napięcie w instalacji samochodu po niżej którego dołączamy baterię.
 // powinno być 25/1023.0 ale zmiana wartości pozwala wykalibrować pomiar.
 const double FACTOR = 23.5 / 1023.0;
 const int SECONDS_WITHOUT_SUPPLY = 10;
@@ -31,10 +38,12 @@ int secondsCarOff;
 int secondsEngineOff;
 double batteryVoltage;
 double carVoltage;
+
 bool servedCarOff;
 bool servedCarOn;
 bool servedEngineStart;
 bool servedEngineStop;
+
 
 void carOff();
 void carOn();
