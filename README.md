@@ -1,6 +1,6 @@
-"Komputer pokładowy" dla samochodu Land Rover Discovery 3. Dodatkowe funkcje dla własnych potrzeb.
+"Komputer pokładowy" dla samochodu Land Rover Discovery 3. Integracji ze sprzętem krótkofalarskim.
 
-Platforma sprzętowa : raspberry pi i arduino
+Platforma sprzętowa : raspberry pi i arduino.
 
 
 
