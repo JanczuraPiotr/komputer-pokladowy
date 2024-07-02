@@ -1,23 +1,17 @@
 #include <Arduino.h>
 
 const int SUPPLY_LONG = 14;               // Zasilanie na dłuższym przewodzie
-const int SUPPLY_SHORT = 15;              // Zasilane na krutszym przewodzie
+const int SUPPLY_SHORT = 15;              // Zasilane na krótszym przewodzie
 const int SUPPLY_RADIO = 16;              // Zasilanie radia
-const int BATERY_CHARGING = 17;           // Ładowanie baterii
+const int BATTRERY_CHARGING = 17;         // Ładowanie baterii
 const int BATTERY_VOLTAGE = 18;           // Napięcie baterii
 const int CAR_VOLTAGE = 19;               // Napięcie w samochodzie
-const double CAR_OFF_VOLTAGE = 10.0;      // Napięcie poniżej którego uznajemy że samochód został wyłączony
-const double CAR_ON_VOLTAGE = 11.0;       // Napięcie powyżej którego uznajemy że samochód został włączony.
-const double CAR_CHARGING_VOLTAGE = 12.30;// Napięcie w samochodzie powyżej którego uznajemy że jest ładowanie.
-const double CAR_LOW_VOLTAGE = 12.0
-
-
-
-
-
-    0;
+const double CAR_OFF_VOLTAGE = 10.0;      // Napięcie poniżej, którego uznajemy, że samochód został wyłączony.
+const double CAR_ON_VOLTAGE = 11.0;       // Napięcie powyżej, którego uznajemy, że samochód został włączony.
+const double CAR_CHARGING_VOLTAGE = 12.30;// Napięcie w samochodzie powyżej, którego uznajemy, że jest ładowanie.
+const double CAR_LOW_VOLTAGE = 12.00;
 // Napięcie w instalacji samochodu po niżej którego dołączamy baterię.
-// powinno być 25/1023.0 ale zmiana wartości pozwala wykalibrować pomiar.
+// powinno być 25/1023.0 ,ale zmiana wartości pozwala wykalibrować pomiar.
 const double FACTOR = 23.5 / 1023.0;
 const int SECONDS_WITHOUT_SUPPLY = 10;
 const int SECONDS_WITHOUT_CHARGING = 10;
@@ -68,11 +62,11 @@ void setup()
   pinMode(SUPPLY_LONG, OUTPUT);
   pinMode(SUPPLY_SHORT, OUTPUT);
   pinMode(SUPPLY_RADIO, OUTPUT);
-  pinMode(BATERY_CHARGING, OUTPUT);
+  pinMode(BATTERY_CHARGING, OUTPUT);
   digitalWrite(SUPPLY_LONG, HIGH);
   digitalWrite(SUPPLY_SHORT, HIGH);
   digitalWrite(SUPPLY_RADIO, HIGH);
-  digitalWrite(BATERY_CHARGING, HIGH);
+  digitalWrite(BATTERY_CHARGING, HIGH);
 
   pinMode(BATTERY_VOLTAGE, INPUT);
   pinMode(CAR_VOLTAGE, INPUT);
@@ -153,7 +147,7 @@ void carSleep()
 // digitalWrite(SUPPLY_LONG, HIGH);
 // digitalWrite(SUPPLY_SHORT, HIGH);
 // digitalWrite(SUPPLY_RADIO, HIGH);
-// digitalWrite(BATERY_CHARGING, HIGH);
+// digitalWrite(BATTERY_CHARGING, HIGH);
 // supplyLong = false;
 // supplyShort = false;
 // supplyRadio = false;
@@ -170,7 +164,7 @@ void carOff()
     digitalWrite(SUPPLY_LONG, HIGH);
     digitalWrite(SUPPLY_SHORT, HIGH);
     digitalWrite(SUPPLY_RADIO, HIGH);
-    digitalWrite(BATERY_CHARGING, HIGH);
+    digitalWrite(BATTERY_CHARGING, HIGH);
     supplyLong = false;
     supplyShort = false;
     supplyRadio = false;
@@ -185,7 +179,7 @@ void carOn()
   digitalWrite(SUPPLY_LONG, LOW);
   digitalWrite(SUPPLY_SHORT, LOW);
   digitalWrite(SUPPLY_RADIO, LOW);
-  digitalWrite(BATERY_CHARGING, HIGH);
+  digitalWrite(BATTERY_CHARGING, HIGH);
   prevState = currentState;
   supplyLong = true;
   supplyShort = true;
@@ -200,7 +194,7 @@ void engineOff()
     digitalWrite(SUPPLY_LONG, LOW);
     digitalWrite(SUPPLY_SHORT, LOW);
     digitalWrite(SUPPLY_RADIO, LOW);
-    digitalWrite(BATERY_CHARGING, HIGH);
+    digitalWrite(BATTERY_CHARGING, HIGH);
     prevState = currentState;
     currentState = State::CAR_ON;
     supplyLong = true;
@@ -217,7 +211,7 @@ void engineOn()
   digitalWrite(SUPPLY_LONG, LOW);
   digitalWrite(SUPPLY_SHORT, LOW);
   digitalWrite(SUPPLY_RADIO, LOW);
-  digitalWrite(BATERY_CHARGING, LOW);
+  digitalWrite(BATTERY_CHARGING, LOW);
   prevState = currentState;
   supplyLong = true;
   supplyShort = true;
