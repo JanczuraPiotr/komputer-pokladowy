@@ -1,9 +1,25 @@
 #include <Arduino.h>
 
+
+//// the setup function runs once when you press reset or power the board
+//void setup() {
+//    // initialize digital pin LED_BUILTIN as an output.
+//    pinMode(LED_BUILTIN, OUTPUT);
+//}
+//
+//// the loop function runs over and over again forever
+//void loop() {
+//    digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+//    delay(1000);                      // wait for a second
+//    digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
+//    delay(1000);                      // wait for a second
+//}
+
+
 const int SUPPLY_LONG = 14;               // Zasilanie na dłuższym przewodzie
 const int SUPPLY_SHORT = 15;              // Zasilane na krótszym przewodzie
 const int SUPPLY_RADIO = 16;              // Zasilanie radia
-const int BATTRERY_CHARGING = 17;         // Ładowanie baterii
+const int BATTERY_CHARGING = 17;         // Ładowanie baterii
 const int BATTERY_VOLTAGE = 18;           // Napięcie baterii
 const int CAR_VOLTAGE = 19;               // Napięcie w samochodzie
 const double CAR_OFF_VOLTAGE = 10.0;      // Napięcie poniżej, którego uznajemy, że samochód został wyłączony.
