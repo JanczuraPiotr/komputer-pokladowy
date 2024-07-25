@@ -1,11 +1,15 @@
 #include <Arduino.h>
 
-const int SUPPLY_LONG = 14;               // Zasilanie na dłuższym przewodzie
-const int SUPPLY_SHORT = 15;              // Zasilane na krótszym przewodzie
-const int SUPPLY_RADIO = 16;              // Zasilanie radia
-const int BATTERY_CHARGING = 17;         // Ładowanie baterii
+
+const int SUPPLY_RADIO = 16;              // dOUT Zasilanie radia.
+constexpr int SUPPLY_EMBEDDED = 1;
+const int BATTERY_CHARGING = 17;          // dOUT Ładowanie baterii.
+
+const int CAR_VOLTAGE = 19;               // aIN Napięcie w samochodzie.
+
+const int SUPPLY_LONG = 14;               // OnOff Zasilanie na dłuższym przewodzie
+const int SUPPLY_SHORT = 15;              // OnOff Zasilane na krótszym przewodzie
 const int BATTERY_VOLTAGE = 18;           // Napięcie baterii
-const int CAR_VOLTAGE = 19;               // Napięcie w samochodzie
 const double CAR_OFF_VOLTAGE = 10.0;      // Napięcie poniżej, którego uznajemy, że samochód został wyłączony.
 const double CAR_ON_VOLTAGE = 11.0;       // Napięcie powyżej, którego uznajemy, że samochód został włączony.
 const double CAR_CHARGING_VOLTAGE = 12.30;// Napięcie w samochodzie powyżej, którego uznajemy, że jest ładowanie.
