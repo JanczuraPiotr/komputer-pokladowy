@@ -7,14 +7,14 @@
 
 #include <gtest/gtest.h>
 
-namespace test {
+//namespace test {
 
 
 /// \brief Test klasy rozpoznaj¹cej stan zasilania samochodu.
-class CarPowerStateTest : public  ::testing::Test {
+class CarStateTest : public  ::testing::Test {
 
 };
 
 
-}
+//}
 #endif //TEST_CAR_POWER_STATE_TEST
