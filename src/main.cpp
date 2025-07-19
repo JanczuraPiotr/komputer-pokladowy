@@ -427,23 +427,8 @@ void carSleep(bool switchRadioAutoStart,
         relaySet(RELAY_HIGH_POWER, RELAY_OFF);
     }
 
-    if (switchLowPowerPermanentOn)
-    {
-        relaySet(RELAY_LOW_POWER, RELAY_ON);
-    }
-    else
-    {
-        relaySet(RELAY_LOW_POWER, RELAY_OFF);
-    }
-
-    if (switchLowPowerPermanentOn)
-    {
-        relaySet(RELAY_CHARGING, RELAY_ON);
-    }
-    else
-    {
-        relaySet(RELAY_CHARGING, RELAY_OFF);
-    }
+    relaySet(RELAY_LOW_POWER, RELAY_OFF);
+    relaySet(RELAY_CHARGING, RELAY_OFF);
 }
 
 void chargingStop(bool switchRadioAutoStart,
