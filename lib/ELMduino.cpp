@@ -1,29 +1,6 @@
 #include "ELMduino.h"
 
 
-
-
-/*
- bool ELM327::begin(Stream &stream, const bool& debug, const uint16_t& timeout, const char& protocol, const uint16_t& payloadLen, const byte& dataTimeout)
-
- Description:
- ------------
-  * Constructor for the ELM327 Class; initializes ELM327
-
- Inputs:
- -------
-  * Stream &stream      - Reference to Serial port connected to ELM327
-  * bool debug          - Specify whether or not to print debug statements to "Serial"
-  * uint16_t timeout    - Time in ms to wait for a query response
-  * char protocol       - Protocol ID to specify the ELM327 to communicate with the ECU over
-  * uint16_t payloadLen - Maximum number of bytes expected to be returned by the ELM327 after a query
-  * byte dataTimeout    - Number of ms to wait after receiving data before the ELM327 will
-						  return the data - see https://www.elmelectronics.com/help/obd/tips/#UnderstandingOBD
- Return:
- -------
-  * bool - Whether or not the ELM327 was propperly
-  initialized
-*/
 bool ELM327::begin(Stream &stream, const bool& debug, const uint16_t& timeout, const char& protocol, const uint16_t& payloadLen, const byte& dataTimeout)
 {
 	elm_port    = &stream;
@@ -44,7 +21,27 @@ bool ELM327::begin(Stream &stream, const bool& debug, const uint16_t& timeout, c
 	return true;
 }
 
+/*
 
+ bool ELM327::begin(Stream &stream, const bool& debug, const uint16_t& timeout, const char& protocol, const uint16_t& payloadLen, const byte& dataTimeout)
+ Description:
+ ------------
+  * Constructor for the ELM327 Class; initializes ELM327
+
+ Inputs:
+ -------
+  * Stream &stream      - Reference to Serial port connected to ELM327
+  * bool debug          - Specify whether or not to print debug statements to "Serial"
+  * uint16_t timeout    - Time in ms to wait for a query response
+  * char protocol       - Protocol ID to specify the ELM327 to communicate with the ECU over
+  * uint16_t payloadLen - Maximum number of bytes expected to be returned by the ELM327 after a query
+  * byte dataTimeout    - Number of ms to wait after receiving data before the ELM327 will
+						  return the data - see https://www.elmelectronics.com/help/obd/tips/#UnderstandingOBD
+ Return:
+ -------
+  * bool - Whether or not the ELM327 was propperly
+  initialized
+*/
 
 
 /*

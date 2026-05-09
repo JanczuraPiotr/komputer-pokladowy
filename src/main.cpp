@@ -174,7 +174,7 @@ void loop()
     bool switchLowPowerPermanentOn = readSwitchLowPowerPermanentOn();
 
     auto state = voltageState(batteryVoltage, carVoltage);
-    if (1 || state.currentState != state.prevState)
+    if (state.currentState != state.prevState)
     {
         switch (state.currentState)
         {
@@ -219,7 +219,7 @@ void loop()
         }
     }
 
-    if (1 || state.currentState > VoltageState::SLEEP)
+    if (state.currentState > VoltageState::SLEEP)
     {
         if (Serial.availableForWrite())
         {
