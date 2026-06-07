@@ -5,13 +5,17 @@ struct VoltageState
     enum State
     {
         START,
+
         // Jeżeli rozpoznano ten stan, to odbiorniki mogą być podłączone, dopiero gdy jest ładowanie.
         BATTERY_TO_LOW,
+        // Jeżeli rozpoznano ten stan, odbiorniki mogą być włączone tylko gdy włączony jest przełącznik
+        // SWITCH_2
         BATTERY_LOW,
+
         // Auto jest zamknięte
         SLEEP,
         // STANDBY to stan pojazdu (Land Rover Discovery 3) po otwarciu zamka centralnego przez około 10 minut
-        // bezczynności oraz przez cały czas pracy silnika i kilka minut po wyłączeniu silnika aż do zamknięcia
+        // bezczynności oraz przez cały czas pracy silnika i kilka minut po wyłączeniu silnika lub do zamknięcia
         // zamka centralnego.
         STANDBY,
         // Rozpoznano ładowanie, trwa ładowanie.
@@ -36,8 +40,9 @@ const int RELAY_LOW_POWER = 10;
 // dOut Niebieski -> przekaźnik -> zielony.
 const int RELAY_HIGH_POWER = 11;
 // dOut Czarny -> przekaźnik -> brązowy.
-const int RELAY_RADIO = 12;
+const int RELAY_HAM = 12;
 
+// Numery przełączników na panelu.
 // dIn Pomarańczowy
 const int SWITCH_1 = 8;
 // dIn Żółty
@@ -47,10 +52,10 @@ const int SWITCH_3 = 6;
 // dIn Niebieski
 const int SWITCH_4 = 5;
 
-const int SWITCH_RADIO_AUTO_START = SWITCH_1;
-const int SWITCH_RADIO_PERMAMENT_ON = SWITCH_2;
-const int SWITCH_HIGH_POWER_PERMAMENT_ON = SWITCH_3;
-const int SWITCH_LOW_POWER_PERMAMENT_ON = SWITCH_4;
+const int SWITCH_PERMAMENT_ON = SWITCH_1;
+const int SWITCH_HAM = SWITCH_2;
+const int SWITCH_3_NOT_USED = SWITCH_3;
+const int SWITCH_LOW_POWER = SWITCH_4;
 
 const bool SWITCH_ON = LOW;
 const bool SWITCH_OFF = HIGH;
@@ -63,7 +68,7 @@ const bool RELAY_OFF = HIGH;
 // Napięcie powyżej, którego uznajemy, że samochód został włączony.
 const double STANDBY_VOLTAGE = 2;
 // Napięcie w samochodzie powyżej, którego uznajemy, że jest ładowanie.
-const double CAR_CHARGING_VOLTAGE = 12.50;
+const double CAR_CHARGING_VOLTAGE = 13.00;
 const double BATTERY_LOW = 11.0;
 const double BATTERY_TO_LOW = 10.5;
 
@@ -102,10 +107,10 @@ bool servedCarOn;
 bool servedEngineStart;
 bool servedEngineStop;
 
-bool switchRadioAutoStart;
-bool switchRadioPermanetOn;
-bool switchHighPowerPermanentOn;
-bool switchLowPowerPermanentOn;
+bool switchHAMAutoStart;
+bool switchPermanentOn;
+bool switchHighPowerOn;
+bool switchLowPowerOn;
 
 const unsigned long TIME_DELAY_SLEEP = 5000;
 const unsigned long TIME_DELAY_ON = 1000;
@@ -119,34 +124,24 @@ void batteryLow();
 
 void batteryToLow();
 
-void carSleep(bool switchRadioAutoStart,
-                    bool switchRadioPermanetOn,
-                    bool switchHighPowerPermanentOn,
-                    bool switchLowPowerPermanentOn);
+void carSleep(bool permanentOn, bool HAMRadioOn, bool switchNotUsedOn, bool lowPowerOn);
 
-void chargingStop(bool switchRadioAutoStart,
-                bool switchRadioPermanentOn,
-                bool switchHighPowerPermanentOn,
-                bool switchLowPowerPermanentOn);
+void standby(bool permanentOn, bool HAMRadioOn, bool switchNotUsedOn, bool lowPowerOn);
 
-void chargingStart(bool switchRadioAutoStart,
-              bool switchRadioPermanentOn,
-              bool switchHighPowerPermanentOn,
-              bool switchLowPowerPermanentOn);
-
+void charging(bool HAMRadioOn, bool switchNotUsedOn, bool lowPowerOn);
 
 
 void relaySet(int relayNr, bool value);
-bool readSwitchRadioAutoStart();
-bool readSwitchRadioPermanentOn();
-bool readSwitchHighPowerPermanentOn();
-bool readSwitchLowPowerPermanentOn();
+bool readSwitchHAMRadio();
+bool readSwitchPermanentOn();
+bool readSwitchNotUsed();
+bool readSwitchLowPowerOn();
 
 
 void setup()
 {
     pinMode(RELAY_CHARGING, OUTPUT);
-    pinMode(RELAY_RADIO, OUTPUT);
+    pinMode(RELAY_HAM, OUTPUT);
     pinMode(RELAY_LOW_POWER, OUTPUT);
     pinMode(RELAY_HIGH_POWER, OUTPUT);
 
@@ -156,7 +151,7 @@ void setup()
     pinMode(SWITCH_4, INPUT);
 
     relaySet(RELAY_CHARGING, SWITCH_OFF);
-    relaySet(RELAY_RADIO, SWITCH_OFF);
+    relaySet(RELAY_HAM, SWITCH_OFF);
     relaySet(RELAY_LOW_POWER, SWITCH_OFF);
     relaySet(RELAY_HIGH_POWER, SWITCH_OFF);
 
@@ -168,13 +163,28 @@ void loop()
     batteryVoltage = static_cast<double>(analogRead(BATTERY_VOLTAGE_PIN)) * FACTOR_BATTERY_VOLTAGE;
     carVoltage = static_cast<double>(analogRead(CAR_VOLTAGE_PIN)) * FACTOR_CAR_VOLTAGE;
 
-    bool switchRadioAutoStart = readSwitchRadioAutoStart();
-    bool switchRadioPermanentOn = readSwitchRadioPermanentOn();
-    bool switchHighPowerPermanentOn = readSwitchHighPowerPermanentOn();
-    bool switchLowPowerPermanentOn = readSwitchLowPowerPermanentOn();
+    static bool permanent = false;
+    static bool HAMRadio = false;
+    static bool notUsed = false;
+    static bool lowPower = false;
+
+    bool switchPermanent = readSwitchPermanentOn();
+    bool switchHAMRadio = readSwitchHAMRadio();
+    bool switchNotUsed = readSwitchNotUsed();
+    bool switchLowPower = readSwitchLowPowerOn();
+
+    bool switchChanged = switchPermanent != permanent ||
+                         switchHAMRadio != HAMRadio ||
+                         switchNotUsed != notUsed ||
+                         switchLowPower != lowPower;
+
+    permanent = switchPermanent;
+    HAMRadio = switchHAMRadio;
+    notUsed = switchNotUsed;
+    lowPower = switchLowPower;
 
     auto state = voltageState(batteryVoltage, carVoltage);
-    if (state.currentState != state.prevState)
+    if (state.currentState != state.prevState || switchChanged)
     {
         switch (state.currentState)
         {
@@ -191,26 +201,17 @@ void loop()
         case VoltageState::State::STANDBY:
         case VoltageState::State::CHARGING_STOP:
             timeDelay = TIME_DELAY_ON;
-            chargingStop(switchRadioAutoStart,
-                       switchRadioPermanentOn,
-                       switchHighPowerPermanentOn,
-                       switchLowPowerPermanentOn);
+            standby(permanent, HAMRadio, notUsed, lowPower);
             break;
 
         case VoltageState::State::CHARGING_START:
             timeDelay = TIME_DELAY_ON;
-            chargingStart(switchRadioAutoStart,
-                     switchRadioPermanentOn,
-                     switchHighPowerPermanentOn,
-                     switchLowPowerPermanentOn);
+            charging(HAMRadio, notUsed, lowPower);
             break;
 
         case VoltageState::State::SLEEP:
             timeDelay = TIME_DELAY_SLEEP;
-            carSleep(switchRadioAutoStart,
-                           switchRadioPermanentOn,
-                           switchHighPowerPermanentOn,
-                           switchLowPowerPermanentOn);
+            carSleep(permanent, HAMRadio, notUsed, lowPower);
             break;
 
         default:
@@ -219,7 +220,7 @@ void loop()
         }
     }
 
-    if (state.currentState > VoltageState::SLEEP)
+    if (1 || state.currentState > VoltageState::SLEEP)
     {
         if (Serial.availableForWrite())
         {
@@ -229,16 +230,16 @@ void loop()
             Serial.print(carVoltage);
 
             Serial.print(" SW_1: ");
-            Serial.print(switchRadioAutoStart);
+            Serial.print(switchPermanent);
 
             Serial.print(" SW_2: ");
-            Serial.print(switchRadioPermanentOn);
+            Serial.print(switchHAMRadio);
 
             Serial.print(" SW_3: ");
-            Serial.print(switchHighPowerPermanentOn);
+            Serial.print(switchNotUsed);
 
             Serial.print(" SW_4: ");
-            Serial.print(switchLowPowerPermanentOn);
+            Serial.print(switchLowPower);
 
             Serial.print(" BatteryToLow: ");
             Serial.print(batteryToLowCount);
@@ -366,30 +367,30 @@ VoltageState voltageState(double batteryVoltage, double carVoltage)
 
 void batteryLow()
 {
-    if (switchRadioPermanetOn)
+    if (switchPermanentOn)
     {
-        relaySet(RELAY_RADIO, RELAY_ON);
+        relaySet(RELAY_HAM, RELAY_ON);
         relaySet(RELAY_HIGH_POWER, RELAY_OFF);
         relaySet(RELAY_LOW_POWER, RELAY_OFF);
         relaySet(RELAY_CHARGING, RELAY_OFF);
     }
-    else if (switchHighPowerPermanentOn)
+    else if (switchHighPowerOn)
     {
-        relaySet(RELAY_RADIO, RELAY_OFF);
+        relaySet(RELAY_HAM, RELAY_OFF);
         relaySet(RELAY_HIGH_POWER, RELAY_ON);
         relaySet(RELAY_LOW_POWER, RELAY_OFF);
         relaySet(RELAY_CHARGING, RELAY_OFF);
     }
-    else if (switchLowPowerPermanentOn)
+    else if (switchLowPowerOn)
     {
-        relaySet(RELAY_RADIO, RELAY_OFF);
+        relaySet(RELAY_HAM, RELAY_OFF);
         relaySet(RELAY_HIGH_POWER, RELAY_OFF);
         relaySet(RELAY_LOW_POWER, RELAY_ON);
         relaySet(RELAY_CHARGING, RELAY_OFF);
     }
     else
     {
-        relaySet(RELAY_RADIO, RELAY_OFF);
+        relaySet(RELAY_HAM, RELAY_OFF);
         relaySet(RELAY_HIGH_POWER, RELAY_OFF);
         relaySet(RELAY_LOW_POWER, RELAY_OFF);
         relaySet(RELAY_CHARGING, RELAY_OFF);
@@ -398,27 +399,24 @@ void batteryLow()
 
 void batteryToLow()
 {
-    relaySet(RELAY_RADIO, RELAY_OFF);
+    relaySet(RELAY_HAM, RELAY_OFF);
     relaySet(RELAY_HIGH_POWER, RELAY_OFF);
     relaySet(RELAY_LOW_POWER, RELAY_OFF);
     relaySet(RELAY_CHARGING, RELAY_OFF);
 }
 
-void carSleep(bool switchRadioAutoStart,
-                    bool switchRadioPermanetOn,
-                    bool switchHighPowerPermanentOn,
-                    bool switchLowPowerPermanentOn)
+void carSleep( bool permanentOn, bool HAMRadioOn, bool switchNotUsedOn, bool lowPowerOn)
 {
-    if (switchRadioPermanetOn)
+    if (HAMRadioOn && permanentOn)
     {
-        relaySet(RELAY_RADIO, RELAY_ON);
+        relaySet(RELAY_HAM, RELAY_ON);
     }
     else
     {
-        relaySet(RELAY_RADIO, RELAY_OFF);
+        relaySet(RELAY_HAM, RELAY_OFF);
     }
 
-    if (switchHighPowerPermanentOn)
+    if (switchNotUsedOn && permanentOn)
     {
         relaySet(RELAY_HIGH_POWER, RELAY_ON);
     }
@@ -427,34 +425,7 @@ void carSleep(bool switchRadioAutoStart,
         relaySet(RELAY_HIGH_POWER, RELAY_OFF);
     }
 
-    relaySet(RELAY_LOW_POWER, RELAY_OFF);
-    relaySet(RELAY_CHARGING, RELAY_OFF);
-}
-
-void chargingStop(bool switchRadioAutoStart,
-                 bool switchRadioPermanentOn,
-                 bool switchHighPowerPermanentOn,
-                 bool switchLowPowerPermanentOn)
-{
-    if (switchRadioAutoStart || switchRadioPermanentOn)
-    {
-        relaySet(RELAY_RADIO, RELAY_ON);
-    }
-    else
-    {
-        relaySet(RELAY_RADIO, RELAY_OFF);
-    }
-
-    if (switchHighPowerPermanentOn)
-    {
-        relaySet(RELAY_HIGH_POWER, RELAY_ON);
-    }
-    else
-    {
-        relaySet(RELAY_HIGH_POWER, RELAY_OFF);
-    }
-
-    if (switchLowPowerPermanentOn)
+    if (lowPowerOn && permanentOn)
     {
         relaySet(RELAY_LOW_POWER, RELAY_ON);
     }
@@ -466,21 +437,18 @@ void chargingStop(bool switchRadioAutoStart,
     relaySet(RELAY_CHARGING, RELAY_OFF);
 }
 
-void chargingStart(bool switchRadioAutoStart,
-              bool switchRadioPermanentOn,
-              bool switchHighPowerPermanentOn,
-              bool switchLowPowerPermanentOn)
+void standby( bool permanentOn, bool HAMRadioOn, bool switchNotUsedOn, bool lowPowerOn)
 {
-    if (switchRadioAutoStart || switchRadioPermanentOn)
+    if (HAMRadioOn)
     {
-        relaySet(RELAY_RADIO, RELAY_ON);
+        relaySet(RELAY_HAM, RELAY_ON);
     }
     else
     {
-        relaySet(RELAY_RADIO, RELAY_OFF);
+        relaySet(RELAY_HAM, RELAY_OFF);
     }
 
-    if (switchHighPowerPermanentOn)
+    if (switchNotUsedOn)
     {
         relaySet(RELAY_HIGH_POWER, RELAY_ON);
     }
@@ -489,7 +457,39 @@ void chargingStart(bool switchRadioAutoStart,
         relaySet(RELAY_HIGH_POWER, RELAY_OFF);
     }
 
-    if (switchLowPowerPermanentOn)
+    if (lowPowerOn)
+    {
+        relaySet(RELAY_LOW_POWER, RELAY_ON);
+    }
+    else
+    {
+        relaySet(RELAY_LOW_POWER, RELAY_OFF);
+    }
+
+    relaySet(RELAY_CHARGING, RELAY_OFF);
+}
+
+void charging(bool HAMRadioOn, bool switchNotUsedOn, bool lowPowerOn)
+{
+    if (HAMRadioOn)
+    {
+        relaySet(RELAY_HAM, RELAY_ON);
+    }
+    else
+    {
+        relaySet(RELAY_HAM, RELAY_OFF);
+    }
+
+    if (switchNotUsedOn)
+    {
+        relaySet(RELAY_HIGH_POWER, RELAY_ON);
+    }
+    else
+    {
+        relaySet(RELAY_HIGH_POWER, RELAY_OFF);
+    }
+
+    if (lowPowerOn)
     {
         relaySet(RELAY_LOW_POWER, RELAY_ON);
     }
@@ -511,24 +511,24 @@ bool switchRead(int pin)
     return digitalRead(pin) > 0 ? SWITCH_ON : SWITCH_OFF;
 }
 
-bool readSwitchRadioAutoStart()
+bool readSwitchHAMRadio()
 {
-    return switchRead(SWITCH_RADIO_AUTO_START);
+    return switchRead(SWITCH_HAM);
 }
 
-bool readSwitchRadioPermanentOn()
+bool readSwitchPermanentOn()
 {
-    return switchRead(SWITCH_RADIO_PERMAMENT_ON);
+    return switchRead(SWITCH_PERMAMENT_ON);
 }
 
-bool readSwitchHighPowerPermanentOn()
+bool readSwitchNotUsed()
 {
-    return switchRead(SWITCH_HIGH_POWER_PERMAMENT_ON);
+    return switchRead(SWITCH_3_NOT_USED);
 }
 
-bool readSwitchLowPowerPermanentOn()
+bool readSwitchLowPowerOn()
 {
-    return switchRead(SWITCH_LOW_POWER_PERMAMENT_ON);
+    return switchRead(SWITCH_LOW_POWER);
 }
 
 
