@@ -68,7 +68,8 @@ const bool RELAY_OFF = HIGH;
 // Napięcie powyżej, którego uznajemy, że samochód został włączony.
 const double STANDBY_VOLTAGE = 2;
 // Napięcie w samochodzie powyżej, którego uznajemy, że jest ładowanie.
-const double CAR_CHARGING_VOLTAGE = 13.00;
+// Wartość dobrana testami.
+const double CAR_CHARGING_VOLTAGE = 12.90;
 const double BATTERY_LOW = 11.0;
 const double BATTERY_TO_LOW = 10.5;
 
@@ -220,66 +221,63 @@ void loop()
         }
     }
 
-    if (1 || state.currentState > VoltageState::SLEEP)
+    if (Serial.availableForWrite())
     {
-        if (Serial.availableForWrite())
+        Serial.print("Bateria : ");
+        Serial.print(batteryVoltage);
+        Serial.print(" Samochod : ");
+        Serial.print(carVoltage);
+
+        Serial.print(" SW_1: ");
+        Serial.print(switchPermanent);
+
+        Serial.print(" SW_2: ");
+        Serial.print(switchHAMRadio);
+
+        Serial.print(" SW_3: ");
+        Serial.print(switchNotUsed);
+
+        Serial.print(" SW_4: ");
+        Serial.print(switchLowPower);
+
+        Serial.print(" BatteryToLow: ");
+        Serial.print(batteryToLowCount);
+
+        Serial.print(" BatteryLow: ");
+        Serial.print(batteryLowCount);
+
+        Serial.print(" Stan: ");
+        switch (state.currentState)
         {
-            Serial.print("Bateria : ");
-            Serial.print(batteryVoltage);
-            Serial.print(" Samochod : ");
-            Serial.print(carVoltage);
+            case VoltageState::State::START:
+                Serial.print(" START");
+            break;
 
-            Serial.print(" SW_1: ");
-            Serial.print(switchPermanent);
+            case VoltageState::State::BATTERY_TO_LOW:
+                Serial.print(" BATTERY_TO_LOW");
+            break;
 
-            Serial.print(" SW_2: ");
-            Serial.print(switchHAMRadio);
+            case VoltageState::State::BATTERY_LOW:
+                Serial.print(" BATTERY_LOW");
+            break;
 
-            Serial.print(" SW_3: ");
-            Serial.print(switchNotUsed);
+            case VoltageState::State::SLEEP:
+                Serial.print(" SLEEP");
+            break;
 
-            Serial.print(" SW_4: ");
-            Serial.print(switchLowPower);
+            case VoltageState::State::STANDBY:
+                Serial.print(" STANDBY");
+            break;
 
-            Serial.print(" BatteryToLow: ");
-            Serial.print(batteryToLowCount);
-
-            Serial.print(" BatteryLow: ");
-            Serial.print(batteryLowCount);
-
-            Serial.print(" Stan: ");
-            switch (state.currentState)
-            {
-                case VoltageState::State::START:
-                    Serial.print(" START");
+            case VoltageState::State::CHARGING_START:
+                Serial.print(" CHARGING_START");
                 break;
 
-                case VoltageState::State::BATTERY_TO_LOW:
-                    Serial.print(" BATTERY_TO_LOW");
+            case VoltageState::State::CHARGING_STOP:
+                Serial.print(" CHARGING_STOP");
                 break;
-
-                case VoltageState::State::BATTERY_LOW:
-                    Serial.print(" BATTERY_LOW");
-                break;
-
-                case VoltageState::State::SLEEP:
-                    Serial.print(" SLEEP");
-                break;
-
-                case VoltageState::State::STANDBY:
-                    Serial.print(" STANDBY");
-                break;
-
-                case VoltageState::State::CHARGING_START:
-                    Serial.print(" CHARGING_START");
-                    break;
-
-                case VoltageState::State::CHARGING_STOP:
-                    Serial.print(" CHARGING_STOP");
-                    break;
-            }
-            Serial.println("");
         }
+        Serial.println("");
     }
 
     delay(timeDelay);
@@ -309,18 +307,6 @@ VoltageState voltageState(double batteryVoltage, double carVoltage)
         {
             batteryToLowCount > 0 ? --batteryToLowCount : batteryToLowCount = 0;
             state.currentState = VoltageState::State::BATTERY_LOW;
-        }
-
-        if (carVoltage < CAR_CHARGING_VOLTAGE)
-        {
-            return state;
-        }
-        else
-        {
-            batteryToLowCount = 0;
-            batteryLowCount = 0;
-            state.currentState = VoltageState::State::CHARGING_START;
-            return state;
         }
     }
     else
@@ -358,6 +344,8 @@ VoltageState voltageState(double batteryVoltage, double carVoltage)
 
     if (carVoltage >= CAR_CHARGING_VOLTAGE)
     {
+        batteryToLowCount = 0;
+        batteryLowCount = 0;
         state.currentState = VoltageState::State::CHARGING_START;
         return state;
     }
@@ -372,28 +360,28 @@ void batteryLow()
         relaySet(RELAY_HAM, RELAY_ON);
         relaySet(RELAY_HIGH_POWER, RELAY_OFF);
         relaySet(RELAY_LOW_POWER, RELAY_OFF);
-        relaySet(RELAY_CHARGING, RELAY_OFF);
+        // relaySet(RELAY_CHARGING, RELAY_OFF);
     }
     else if (switchHighPowerOn)
     {
         relaySet(RELAY_HAM, RELAY_OFF);
         relaySet(RELAY_HIGH_POWER, RELAY_ON);
         relaySet(RELAY_LOW_POWER, RELAY_OFF);
-        relaySet(RELAY_CHARGING, RELAY_OFF);
+        // relaySet(RELAY_CHARGING, RELAY_OFF);
     }
     else if (switchLowPowerOn)
     {
         relaySet(RELAY_HAM, RELAY_OFF);
         relaySet(RELAY_HIGH_POWER, RELAY_OFF);
         relaySet(RELAY_LOW_POWER, RELAY_ON);
-        relaySet(RELAY_CHARGING, RELAY_OFF);
+        // relaySet(RELAY_CHARGING, RELAY_OFF);
     }
     else
     {
         relaySet(RELAY_HAM, RELAY_OFF);
         relaySet(RELAY_HIGH_POWER, RELAY_OFF);
         relaySet(RELAY_LOW_POWER, RELAY_OFF);
-        relaySet(RELAY_CHARGING, RELAY_OFF);
+        // relaySet(RELAY_CHARGING, RELAY_OFF);
     }
 }
 
@@ -402,7 +390,7 @@ void batteryToLow()
     relaySet(RELAY_HAM, RELAY_OFF);
     relaySet(RELAY_HIGH_POWER, RELAY_OFF);
     relaySet(RELAY_LOW_POWER, RELAY_OFF);
-    relaySet(RELAY_CHARGING, RELAY_OFF);
+    // relaySet(RELAY_CHARGING, RELAY_OFF);
 }
 
 void carSleep( bool permanentOn, bool HAMRadioOn, bool switchNotUsedOn, bool lowPowerOn)
